@@ -8,7 +8,7 @@ class Persona(models.Model):
     fecha_nacimiento = models.DateField()
     ciudad           = models.CharField(max_length=15)
     email            = models.EmailField(max_length=80, unique=True)
-    contraseña       = models.CharField(max_length=50)
+    contrasenia      = models.CharField(max_length=50)
     telefono         = models.IntegerField()
     domicilio        = models.CharField(max_length=50)
     created_at       = models.DateTimeField(auto_now_add=True)
