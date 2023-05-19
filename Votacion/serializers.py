@@ -1,17 +1,17 @@
-from .models import PartidoElectoral, Candidato, PadronElectoral, Votacion, Voto, Resultado
+from .models import PadronElectoral, Votacion, Voto, Resultado
 from rest_framework import serializers
 
-class PartidoElectoralSerializer(serializers.ModelSerializer):
+""" class PartidoElectoralSerializer(serializers.ModelSerializer):
     class Meta:
         model  = PartidoElectoral
         fields = ['id','nombre_partido','Sigla','Slogan','created_at','updated_at']
-        read_onty_fields = ('created_at', 'updated_at',)
+        read_onty_fields = ('created_at', 'updated_at',) """
 
-class CandidatoSerializer(serializers.ModelSerializer):
+""" class CandidatoSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Candidato
         fields = ['carnet_identidad','nombre','apellido','fecha_nacimiento','ciudad','email','telefono','domicilio','id_partido','created_at','updated_at']
-        read_onty_fields = ('created_at', 'updated_at',)
+        read_onty_fields = ('created_at', 'updated_at',) """
 
 class PadronElectoralSerializer(serializers.ModelSerializer):
     class Meta:

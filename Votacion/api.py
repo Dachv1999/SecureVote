@@ -1,20 +1,16 @@
-from .models import PartidoElectoral, Candidato, PadronElectoral, Votacion, Voto, Resultado
+from .models import PadronElectoral, Votacion, Voto, Resultado
 from rest_framework import viewsets, permissions
-from .serializers import PartidoElectoralSerializer, CandidatoSerializer, PadronElectoralSerializer, VotacionSerializer, VotoSerializer, ResultadoSerializer
+from .serializers import PadronElectoralSerializer, VotacionSerializer, VotoSerializer, ResultadoSerializer
 
 ####################################################################
 ##            Implementa un crud basico para cada modelo          ## 
 ####################################################################
 
-class PartidoElectoralViewSet(viewsets.ModelViewSet):
-    queryset = PartidoElectoral.objects.all()
-    serializer_class   = PartidoElectoralSerializer
-    permission_classes = [permissions.AllowAny]
 
-class CandidatoViewSet(viewsets.ModelViewSet):
+""" class CandidatoViewSet(viewsets.ModelViewSet):
     queryset = Candidato.objects.all().order_by('carnet_identidad')
     serializer_class   = CandidatoSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.AllowAny] """
 
 class PadronElectoralViewSet(viewsets.ModelViewSet):
     queryset = PadronElectoral.objects.all().order_by('nro_padron')
