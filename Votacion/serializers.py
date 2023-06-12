@@ -28,7 +28,7 @@ class PadronElectoralUsuarioSerializer(serializers.ModelSerializer):
 class VotacionSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Votacion
-        fields = ['id','tipo_votacion','inicio_votacion','fin_votacion','padron_electoral','partido1','partido2','partido3','partido4','activo','created_at','updated_at']
+        fields = ['id','nombre','tipo_votacion','inicio_votacion','fin_votacion','padron_electoral','partido1','partido2','partido3','partido4','activo','created_at','updated_at']
         read_onty_fields = ('created_at', 'updated_at',)
 
 class AllVotacionSerializer(serializers.ModelSerializer):

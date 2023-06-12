@@ -13,7 +13,7 @@ from Cuenta.serializers import UsuarioSerializer
 from datetime import datetime, timedelta
 
 
-def calcularResultado(id_votacion):
+def calcularResultadoInt(id_votacion):
     votacion = Votacion.objects.get(id = id_votacion)
 
     if votacion.activo == False:
@@ -101,6 +101,108 @@ def calcularResultado(id_votacion):
                     resultado.save()
                     i += 1
 
+@api_view(['GET'])
+def calcularResultado(request, id_votacion):
+    votacion = Votacion.objects.get(id = id_votacion)
+
+    if votacion.activo == False:
+        partido1 = PartidoElectoral.objects.get(id = votacion.partido1.id)
+        partido2 = PartidoElectoral.objects.get(id = votacion.partido2.id)
+        partido3 = PartidoElectoral.objects.get(id = votacion.partido3.id)
+        partido4 = PartidoElectoral.objects.get(id = votacion.partido4.id)
+
+        candidato1 = Usuario.objects.filter(id_partido = partido1).first()
+        candidato2 = Usuario.objects.filter(id_partido = partido2).first()
+        candidato3 = Usuario.objects.filter(id_partido = partido3).first()
+        candidato4 = Usuario.objects.filter(id_partido = partido4).first()
+
+        votos_candidato1 = Voto.objects.filter(ci_candidato = candidato1, id_votacion = votacion, tipo_voto='P').count()
+        votos_candidato2 = Voto.objects.filter(ci_candidato = candidato2, id_votacion = votacion, tipo_voto='P').count()
+        votos_candidato3 = Voto.objects.filter(ci_candidato = candidato3, id_votacion = votacion, tipo_voto='P').count()
+        votos_candidato4 = Voto.objects.filter(ci_candidato = candidato4, id_votacion = votacion, tipo_voto='P').count()
+
+        votos_blanco     = Voto.objects.filter(id_votacion = votacion, tipo_voto='B' ).count()
+        votos_null       = Voto.objects.filter(id_votacion = votacion, tipo_voto='N' ).count()  
+        
+        candidatos = [candidato1, candidato2, candidato3, candidato4]
+        votos_candidatos = [votos_candidato1, votos_candidato2, votos_candidato3, votos_candidato4]
+        votos_validos = sum(votos_candidatos)
+        total_votos = votos_validos + votos_blanco + votos_null
+
+        if votacion.tipo_votacion == 'N':
+            resultado_indice = determinar_ganador_Normal(votos_candidatos)
+        else:
+            resultado_indice = determinar_ganador_MayoriaAbs(votos_candidatos)
+
+        if len(resultado_indice) == 1:
+            candidato = candidatos[resultado_indice[0]]
+
+            i = 0
+            for cand in candidatos:
+                resultado = Resultado()
+                resultado.ci_candidato = cand
+                resultado.id_votacion = votacion
+                resultado.total_votos = total_votos
+                resultado.cant_votos = votos_candidatos[i]
+                resultado.cant_vpositivo = votos_validos
+                resultado.cant_vblanco = votos_blanco
+                resultado.cant_vnullo = votos_null
+                
+                if cand == candidato:
+                    resultado.estado_result = 'G'
+
+                resultado.save()
+                i += 1
+
+                return Response({
+                    'status_code': status.HTTP_200_OK,
+                    'estado': "Hay un ganador"
+                })
+        else:
+            if len(resultado_indice) == 0:
+                i = 0
+                for cand in candidatos:
+                    resultado = Resultado()
+                    resultado.ci_candidato = cand
+                    resultado.id_votacion = votacion
+                    resultado.total_votos = total_votos
+                    resultado.cant_votos = votos_candidatos[i]
+                    resultado.cant_vpositivo = votos_validos
+                    resultado.cant_vblanco = votos_blanco
+                    resultado.cant_vnullo = votos_null
+
+                    resultado.save()
+                    i += 1
+
+                    return Response({
+                        'status_code': status.HTTP_200_OK,
+                        'estado': "No Hay ganador por mayoria absoluta"
+                    })
+            else:
+                empate_candidatos = []
+                for x in resultado_indice:
+                    empate_candidatos.append(candidatos[x])
+                    
+                i = 0
+                for cand in candidatos:
+                    resultado = Resultado()
+                    resultado.ci_candidato = cand
+                    resultado.id_votacion = votacion
+                    resultado.total_votos = total_votos
+                    resultado.cant_votos = votos_candidatos[i]
+                    resultado.cant_vpositivo = votos_validos
+                    resultado.cant_vblanco = votos_blanco
+                    resultado.cant_vnullo = votos_null
+
+                    if cand in empate_candidatos:
+                        resultado.estado_result = 'E'
+
+                    resultado.save()
+                    i += 1
+                    return Response({
+                        'status_code': status.HTTP_200_OK,
+                        'estado': "Hay empate"
+                    })
 
 def determinar_ganador_MayoriaAbs(votos_candidatos):
     # Obtener el número total de votos
@@ -186,7 +288,7 @@ def devolverVotacionesActivas(request):
     })
 
 @api_view(['GET'])
-def devolverResultadoVotacion(id_votacion):
+def devolverResultadoVotacion(request, id_votacion):
 
     try: 
         votacion = Votacion.objects.get(id = id_votacion)
@@ -196,13 +298,13 @@ def devolverResultadoVotacion(id_votacion):
             'msg': 'Votacion no existe'
         })
     
-    cant_perd = Resultado.objects.filter(id_votacion = id_votacion, estado_result = 'P').count()
+    cant_perd = Resultado.objects.filter(id_votacion = votacion, estado_result = 'P').count()
 
-    candi_result = Resultado.objects.filter(id_votacion = id_votacion)
+    candi_result = Resultado.objects.filter(id_votacion = votacion)
     resulSerialized = ResultadoSerializer(candi_result, many=True)
 
     if cant_perd == 3:
-        ganador = Resultado.objects.get(id_votacion = id_votacion, estado_result = 'G')
+        ganador = Resultado.objects.get(id_votacion = votacion, estado_result = 'G')
         ganadorSerialized = ResultadoSerializer(ganador)
         return Response({
             'resultado':resulSerialized.data,
@@ -212,7 +314,7 @@ def devolverResultadoVotacion(id_votacion):
     
     if  cant_perd < 3:
 
-        empatadores = Resultado.objects.filter(id_votacion = id_votacion, estado_result = 'E')
+        empatadores = Resultado.objects.filter(id_votacion = votacion, estado_result = 'E')
         empatadoresSerialized = ResultadoSerializer(empatadores, many=True)
         return Response({
             'resultado':resulSerialized.data,
@@ -227,7 +329,7 @@ def devolverResultadoVotacion(id_votacion):
         })
     
 @api_view(['GET'])
-def devolverResultadoVotacionPorUsuario(ci_usuario):
+def devolverResultadoVotacionPorUsuario(request,ci_usuario):
 
     try: 
         usuario = Usuario.objects.get(ci = ci_usuario)
@@ -237,36 +339,42 @@ def devolverResultadoVotacionPorUsuario(ci_usuario):
             'msg': 'Votacion no existe'
         })
     
-    padronesUsuario = PadronElectoralUsuario.objects.filter(ci_usuario = ci_usuario)
-    
-    votacionesUsuario = Votacion.objects.filter(padron_electoral__in=padronesUsuario, activo = True)
-    
+
+    padronesUsuario = PadronElectoralUsuario.objects.filter(ci_usuario = usuario)
+    lista_padrones = []
+    for padron_normal in padronesUsuario:
+        lista_padrones.append(padron_normal.id_padron.id)
+
+    padron = PadronElectoral.objects.filter(id__in = lista_padrones)
+
+    votacionesUsuario = Votacion.objects.filter(padron_electoral__in=padron, activo = False)
+
     resultados_final = []
 
     for votacion in votacionesUsuario:
-        cant_perd = Resultado.objects.filter(id_votacion = votacion.id, estado_result = 'P').count()
-
+        cant_perd = Resultado.objects.filter(id_votacion = votacion, estado_result = 'P').count()
 
         if cant_perd == 3:
-            ganador = Resultado.objects.get(id_votacion = votacion.id, estado_result = 'G')
-            ganadorSerialized = ResultadoSerializer(ganador)
-            resultados_final.append(ganadorSerialized)
+            ganador = Resultado.objects.get(id_votacion = votacion, estado_result = 'G')
+            #ganadorSerialized = ResultadoSerializer(ganador)
+            resultados_final.append(ganador)
         
-        if  cant_perd < 3:
+        if  cant_perd < 3 and cant_perd > 0:
 
-            empatador = Resultado.objects.filter(id_votacion = votacion.id, estado_result = 'E').get(0)
-            empatadoresSerialized = ResultadoSerializer(empatador)
-            resultados_final.append(empatadoresSerialized)
+            empatador = Resultado.objects.filter(id_votacion = votacion, estado_result = 'E').first()
+            #empatadoresSerialized = ResultadoSerializer(empatador)
+            resultados_final.append(empatador)
 
         if cant_perd == 4:
-            perdedor = Resultado.objects.filter(id_votacion = votacion.id, estado_result = 'P').get(0)
-            empatadoresSerialized = ResultadoSerializer(perdedor)
-            resultados_final.append(empatadoresSerialized)
+            perdedor = Resultado.objects.filter(id_votacion = votacion, estado_result = 'P').first()
+            #empatadoresSerialized = ResultadoSerializer(perdedor)
+            resultados_final.append(perdedor)
 
-    resultadosSerialized = ResultadoSerializer(resultados_final)
+
+    resultadosSerialized = ResultadoSerializer(resultados_final, many=True)
 
     return Response({
-            'resultado':resultadosSerialized.data,
+            "respuesta":resultadosSerialized.data,
         })
 
 
@@ -386,7 +494,7 @@ def terminarVotacion(request, id_votacion):
     votacion.activo    = False
     votacion.save()
      
-    calcularResultado(id_votacion)
+    calcularResultadoInt(id_votacion)
     return Response({
         'status_code': status.HTTP_202_ACCEPTED,
         'msg': 'Votación terminada satisfactoriamente'

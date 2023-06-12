@@ -15,6 +15,7 @@ from django.contrib.auth.hashers import check_password
 
 from .models import Usuario
 from .serializers import UsuarioTokenSerializer, UsuarioSerializer
+from Votacion.models import PartidoElectoral
 
 @api_view(['POST'])
 def register(request):
@@ -121,9 +122,10 @@ def logout(request):
             })
         
 @api_view(['GET'])
-def devolverCandidato(id_partido):
-    candidato = Usuario.objects.filter(id_partido = id_partido)
-    dataSerializer = UsuarioSerializer(candidato.get(0))
+def devolverCandidato(request, id_partido):
+    partido = PartidoElectoral.objects.get(id = id_partido)
+    candidato = Usuario.objects.filter(id_partido = partido).first()
+    dataSerializer = UsuarioSerializer(candidato)
 
     return Response({
         'candidato': dataSerializer.data
@@ -131,11 +133,16 @@ def devolverCandidato(id_partido):
 
 @api_view(['GET'])
 def devUsrporPartidoE(request, id_partido1, id_partido2, id_partido3, id_partido4):
-    candidato1 = Usuario.objects.filter(id_partido = id_partido1).get(0)
-    candidato2 = Usuario.objects.filter(id_partido = id_partido2).get(0)
-    candidato3 = Usuario.objects.filter(id_partido = id_partido3).get(0)
-    candidato4 = Usuario.objects.filter(id_partido = id_partido4).get(0)
 
+    partido1 = PartidoElectoral.objects.get(id = id_partido1)
+    partido2 = PartidoElectoral.objects.get(id = id_partido2)
+    partido3 = PartidoElectoral.objects.get(id = id_partido3)
+    partido4 = PartidoElectoral.objects.get(id = id_partido4)
+
+    candidato1 = Usuario.objects.filter(id_partido = partido1).first()
+    candidato2 = Usuario.objects.filter(id_partido = partido2).first()
+    candidato3 = Usuario.objects.filter(id_partido = partido3).first()
+    candidato4 = Usuario.objects.filter(id_partido = partido4).first()
 
     cand1serialized = UsuarioSerializer(candidato1)
     cand2serialized = UsuarioSerializer(candidato2)

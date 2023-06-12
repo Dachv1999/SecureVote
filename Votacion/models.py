@@ -19,6 +19,7 @@ class PadronElectoralUsuario(models.Model):
 
 class Votacion(models.Model):
     Votacion_Tipos   = (('N', "Normal"), ('M', "MayoriaAbsoluta"))
+    nombre           = models.CharField(max_length=70, blank=True, null=True)
     tipo_votacion    = models.CharField(default='N', choices=Votacion_Tipos, max_length=1)
     inicio_votacion  = models.DateTimeField(blank=True, null=True)
     fin_votacion     = models.DateTimeField(blank=True, null=True)
@@ -30,7 +31,11 @@ class Votacion(models.Model):
     activo           = models.BooleanField(default=True)
     created_at       = models.DateTimeField(auto_now_add=True)
     updated_at       = models.DateTimeField(auto_now=True)
-   
+    
+    def __str__(self):
+        return str(self.nombre)
+
+
 class Votacion_extended(models.Model):
     votacion_id = models.ForeignKey(Votacion, on_delete = models.CASCADE)
     def __str__(self):
@@ -68,7 +73,7 @@ class Resultado(models.Model):
     updated_at      = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.cant_votos
+        return str(self.cant_votos)
 
 class Resultado_extended(models.Model):
     resultado_id = models.ForeignKey(Resultado, on_delete = models.CASCADE)
