@@ -1,6 +1,6 @@
-from .models import PadronElectoral, Votacion, Voto, Resultado
+from .models import PadronElectoral, Votacion, Voto, Resultado, PadronElectoralUsuario
 from rest_framework import viewsets, permissions
-from .serializers import PadronElectoralSerializer, VotacionSerializer, VotoSerializer, ResultadoSerializer
+from .serializers import PadronElectoralSerializer, VotacionSerializer, VotoSerializer, ResultadoSerializer, PadronElectoralUsuarioSerializer
 
 ####################################################################
 ##            Implementa un crud basico para cada modelo          ## 
@@ -13,8 +13,13 @@ from .serializers import PadronElectoralSerializer, VotacionSerializer, VotoSeri
     permission_classes = [permissions.AllowAny] """
 
 class PadronElectoralViewSet(viewsets.ModelViewSet):
-    queryset = PadronElectoral.objects.all().order_by('nro_padron')
+    queryset = PadronElectoral.objects.all()
     serializer_class   = PadronElectoralSerializer
+    permission_classes = [permissions.AllowAny]
+
+class PadronElectoralUsuarioViewSet(viewsets.ModelViewSet):
+    queryset = PadronElectoralUsuario.objects.all()
+    serializer_class   = PadronElectoralUsuarioSerializer
     permission_classes = [permissions.AllowAny]
 
 class VotacionViewSet(viewsets.ModelViewSet):
