@@ -58,15 +58,17 @@ class Resultado(models.Model):
     GANADOR_ESTADO  = (('G', "Ganador"), ('P', "Perdedor"), ('E', "Empatador"))
     ci_candidato    = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, null=True)
     id_votacion     = models.ForeignKey(Votacion,on_delete=CASCADE)
-    cant_votos      = models.IntegerField(blank=True, null=True)
-    cant_vblanco    = models.IntegerField(blank=True, null=True)
-    cant_vpositivo  = models.IntegerField(blank=True, null=True)
-    cant_vnullo     = models.IntegerField(blank=True, null=True)
-    total_votos     = models.IntegerField(blank=True, null=True)
+    cant_votos      = models.IntegerField(default = 0,blank=True, null=True)
+    cant_vblanco    = models.IntegerField(default = 0,blank=True, null=True)
+    cant_vpositivo  = models.IntegerField(default = 0,blank=True, null=True)
+    cant_vnullo     = models.IntegerField(default = 0,blank=True, null=True)
+    total_votos     = models.IntegerField(default = 0,blank=True, null=True)
     estado_result   = models.CharField(default='P', choices=GANADOR_ESTADO, max_length=1)
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.cant_votos
 
 class Resultado_extended(models.Model):
     resultado_id = models.ForeignKey(Resultado, on_delete = models.CASCADE)

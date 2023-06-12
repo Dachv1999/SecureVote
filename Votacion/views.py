@@ -1,4 +1,5 @@
 import json
+import pytz
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,29 +10,30 @@ from .models import Votacion, PadronElectoral, PadronElectoralUsuario, Voto, Res
 from .serializers import PadronElectoralSerializer, PadronElectoralUsuarioSerializer, VotoSerializer, VotacionSerializer, ResultadoSerializer, AllVotacionSerializer, AllResultadoSerializer
 from Cuenta.models import PartidoElectoral, Usuario
 from Cuenta.serializers import UsuarioSerializer
+from datetime import datetime, timedelta
 
-@api_view(['GET'])
+
 def calcularResultado(id_votacion):
     votacion = Votacion.objects.get(id = id_votacion)
 
     if votacion.activo == False:
-        partido1 = PartidoElectoral.objects.get(id = votacion.partido1)
-        partido2 = PartidoElectoral.objects.get(id = votacion.partido2)
-        partido3 = PartidoElectoral.objects.get(id = votacion.partido3)
-        partido4 = PartidoElectoral.objects.get(id = votacion.partido4)
+        partido1 = PartidoElectoral.objects.get(id = votacion.partido1.id)
+        partido2 = PartidoElectoral.objects.get(id = votacion.partido2.id)
+        partido3 = PartidoElectoral.objects.get(id = votacion.partido3.id)
+        partido4 = PartidoElectoral.objects.get(id = votacion.partido4.id)
 
-        candidato1 = Usuario.objects.filter(id_partido = partido1.id).get(0)
-        candidato2 = Usuario.objects.filter(id_partido = partido2.id).get(0)
-        candidato3 = Usuario.objects.filter(id_partido = partido3.id).get(0)
-        candidato4 = Usuario.objects.filter(id_partido = partido4.id).get(0)
+        candidato1 = Usuario.objects.filter(id_partido = partido1).first()
+        candidato2 = Usuario.objects.filter(id_partido = partido2).first()
+        candidato3 = Usuario.objects.filter(id_partido = partido3).first()
+        candidato4 = Usuario.objects.filter(id_partido = partido4).first()
 
-        votos_candidato1 = Voto.objects.filter(ci_candidato = candidato1.ci, id_votacion = id_votacion, tipo_voto='P').count()
-        votos_candidato2 = Voto.objects.filter(ci_candidato = candidato2.ci, id_votacion = id_votacion, tipo_voto='P').count()
-        votos_candidato3 = Voto.objects.filter(ci_candidato = candidato3.ci, id_votacion = id_votacion, tipo_voto='P').count()
-        votos_candidato4 = Voto.objects.filter(ci_candidato = candidato4.ci, id_votacion = id_votacion, tipo_voto='P').count()
+        votos_candidato1 = Voto.objects.filter(ci_candidato = candidato1, id_votacion = votacion, tipo_voto='P').count()
+        votos_candidato2 = Voto.objects.filter(ci_candidato = candidato2, id_votacion = votacion, tipo_voto='P').count()
+        votos_candidato3 = Voto.objects.filter(ci_candidato = candidato3, id_votacion = votacion, tipo_voto='P').count()
+        votos_candidato4 = Voto.objects.filter(ci_candidato = candidato4, id_votacion = votacion, tipo_voto='P').count()
 
-        votos_blanco     = Voto.objects.filter(id_votacion = id_votacion, tipo_voto='B' ).count()
-        votos_null       = Voto.objects.filter(id_votacion = id_votacion, tipo_voto='N' ).count()  
+        votos_blanco     = Voto.objects.filter(id_votacion = votacion, tipo_voto='B' ).count()
+        votos_null       = Voto.objects.filter(id_votacion = votacion, tipo_voto='N' ).count()  
         
         candidatos = [candidato1, candidato2, candidato3, candidato4]
         votos_candidatos = [votos_candidato1, votos_candidato2, votos_candidato3, votos_candidato4]
@@ -80,7 +82,7 @@ def calcularResultado(id_votacion):
             else:
                 empate_candidatos = []
                 for x in resultado_indice:
-                    empate_candidatos.append(candidatos[resultado_indice[x]])
+                    empate_candidatos.append(candidatos[x])
                     
                 i = 0
                 for cand in candidatos:
@@ -372,14 +374,15 @@ def devolverListaVotosHash(request, votacion_id):#devuelve la lista de votos con
 @api_view(['GET'])
 def terminarVotacion(request, id_votacion):
     try:
-        votacion = Votacion.objects.get(id = id_votacion)
+        votacion = Votacion.objects.get(id = id_votacion, activo = True)
     except Votacion.DoesNotExist:
         return Response({
         'status_code': status.HTTP_404_NOT_FOUND,
         'error': 'Votacion no encontrada'
     })
-    
-    votacion.fin_votacion = str(timezone.now())
+    timezone = pytz.timezone('America/La_Paz')
+    dt = datetime.now(timezone)
+    votacion.fin_votacion = dt
     votacion.activo    = False
     votacion.save()
      
