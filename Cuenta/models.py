@@ -53,7 +53,6 @@ class PartidoElectoral(models.Model):
 
 class Usuario(AbstractBaseUser):
     ci               = models.PositiveIntegerField(primary_key=True)
-    cuenta           = models.CharField(max_length=255, unique=True, blank=True, null=True)
     nombre           = models.CharField(max_length=50, blank=True, null=True)
     apellido         = models.CharField(max_length=50, blank=True, null=True)
     fecha_nacimiento = models.DateField(blank=True, null=True)
@@ -61,8 +60,6 @@ class Usuario(AbstractBaseUser):
     email            = models.EmailField(max_length=80, unique=True)
     informacion      = models.CharField(max_length=100, blank=True, null=True)
     telefono         = models.IntegerField(validators=[MinValueValidator(70000000), MaxValueValidator(79999999)], blank=True, null=True)
-    longitud         = models.CharField(max_length=80, blank=True, null=True)
-    latitud          = models.CharField(max_length=80, blank=True, null=True)
     id_partido       = models.ForeignKey(PartidoElectoral, on_delete=CASCADE, blank=True, null=True)
 
     is_active        = models.BooleanField(default=True)

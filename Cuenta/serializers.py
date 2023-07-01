@@ -10,5 +10,10 @@ class PartidoElectoralSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Usuario
-        fields = ['ci','cuenta','nombre','apellido','fecha_nacimiento','ciudad','email','informacion','total_ventas','total_ganancias','total_gastos','telefono','domicilio','created_at','updated_at']
+        fields = ['ci','nombre','apellido','fecha_nacimiento','ciudad','email','informacion','telefono','id_partido','is_superuser','created_at','updated_at']
         read_onty_fields = ('created_at', 'updated_at',)
+
+class UsuarioTokenSerializer(serializers.ModelSerializer):  #clase para lo que el JSON devolvera
+    class Meta:
+        model  = Usuario
+        fields = ['ci','nombre','apellido','email','is_superuser']
