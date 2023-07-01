@@ -1,4 +1,4 @@
-from .models import PadronElectoral, Votacion, Voto, Resultado, PadronElectoralUsuario, Votacion_extended, Resultado_extended, Voto_extended
+from .models import PadronElectoral, Votacion, Voto, Resultado, PadronElectoralUsuario, Votacion_extended, Resultado_extended, Voto_extended, Referendum, Referendum_extended, VotoReferendum, VotoReferendum_extended, ResultadoReferendum, ResultadoReferendum_extended
 from rest_framework import serializers
 
 """ class PartidoElectoralSerializer(serializers.ModelSerializer):
@@ -28,7 +28,7 @@ class PadronElectoralUsuarioSerializer(serializers.ModelSerializer):
 class VotacionSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Votacion
-        fields = ['id','nombre','tipo_votacion','inicio_votacion','fin_votacion','padron_electoral','partido1','partido2','partido3','partido4','activo','created_at','updated_at']
+        fields = ['id','nombre','tipo_votacion','inicio_votacion','fin_votacion','padron_electoral','partido1','partido2','partido3','partido4','activo','escanio','created_at','updated_at']
         read_onty_fields = ('created_at', 'updated_at',)
 
 class AllVotacionSerializer(serializers.ModelSerializer):
@@ -40,7 +40,7 @@ class AllVotacionSerializer(serializers.ModelSerializer):
 class VotoSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Voto
-        fields = ['id','ci_votante','ci_candidato','hashvoto','id_votacion','created_at','updated_at']
+        fields = ['id','ci_votante','ci_candidato','hashvoto','index','id_votacion','tipo_voto','created_at','updated_at']
         read_onty_fields = ('created_at', 'updated_at',)
 
 class AllVotoSerializer(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class AllVotoSerializer(serializers.ModelSerializer):
 class ResultadoSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Resultado
-        fields = ['id','ci_candidato','id_votacion','cant_votos','cant_vblanco','cant_vpositivo','cant_vnullo','estado_result','total_votos','created_at','updated_at']
+        fields = ['id','ci_candidato','id_votacion','cant_votos','cant_vblanco','cant_vpositivo','cant_vnullo','estado_result','total_votos','escanio_asig','created_at','updated_at']
         read_onty_fields = ('created_at', 'updated_at',)
 
 class AllResultadoSerializer(serializers.ModelSerializer):
@@ -60,3 +60,39 @@ class AllResultadoSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Resultado_extended
         fields = ['resultado_id']
+
+class ReferendumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Referendum
+        fields = '__all__'
+        read_onty_fields = ('created_at', 'updated_at',)
+
+class AllReferendumSerializer(serializers.ModelSerializer):
+    referendum_id = ReferendumSerializer(many=True)
+    class Meta:
+        model  = Referendum_extended
+        fields = ['referendum_id']
+
+class VotoReferendumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VotoReferendum
+        fields = '__all__'
+        read_onty_fields = ('created_at', 'updated_at',)
+
+class AllVotoReferendumSerializer(serializers.ModelSerializer):
+    votoRef_id = VotoReferendumSerializer(many=True)
+    class Meta:
+        model  = VotoReferendum
+        fields = ['votoRef_id']
+
+class ResultadoReferendumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResultadoReferendum
+        fields = '__all__'
+        read_onty_fields = ('created_at', 'updated_at',)
+
+class AllResultadoReferendumSerializer(serializers.ModelSerializer):
+    resultadoRef_id = ResultadoReferendumSerializer(many=True)
+    class Meta:
+        model  = ResultadoReferendum_extended
+        fields = ['resultadoRef_id']

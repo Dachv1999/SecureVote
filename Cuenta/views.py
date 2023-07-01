@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from datetime import datetime, date
 
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.models import Token
@@ -166,6 +167,36 @@ def devUsrsinPartido(request):
     return Response({
         'usuarios': serializedUser.data
     })
+
+
+@api_view(['GET'])
+def buscadorUsuarios(request):
+    received_json_data = json.loads(request.body.decode("utf-8")) #Obtener el JSON
+    
+    ci = received_json_data.get('ci')
+    nombre = received_json_data.get('nombre')
+    apellido = received_json_data.get('apellido')
+    email = received_json_data.get('email')
+
+
+    usuarios = Usuario.objects.all()
+
+    if ci:
+        usuarios = usuarios.filter(ci=ci)
+    if nombre:
+        usuarios = usuarios.filter(nombre__contains=nombre)
+    if apellido:
+        usuarios = usuarios.filter(apellido__contains=apellido)
+    if email:
+        usuarios = usuarios.filter(email__contains=email)
+
+    serializedUser = UsuarioSerializer(usuarios, many=True)
+
+    return Response({
+        'usuarios': serializedUser.data
+    })
+
+
 
 
 

@@ -1,6 +1,6 @@
-from .models import PadronElectoral, Votacion, Voto, Resultado, PadronElectoralUsuario, Votacion_extended
+from .models import PadronElectoral, Votacion, Voto, Resultado, PadronElectoralUsuario, Votacion_extended, Referendum, VotoReferendum, ResultadoReferendum
 from rest_framework import viewsets, permissions
-from .serializers import PadronElectoralSerializer, VotacionSerializer,AllVotacionSerializer, VotoSerializer, ResultadoSerializer, PadronElectoralUsuarioSerializer
+from .serializers import PadronElectoralSerializer, VotacionSerializer,AllVotacionSerializer, VotoSerializer, ResultadoSerializer, PadronElectoralUsuarioSerializer, ReferendumSerializer, VotoReferendumSerializer, ResultadoReferendumSerializer
 
 ####################################################################
 ##            Implementa un crud basico para cada modelo          ## 
@@ -40,4 +40,19 @@ class VotoViewSet(viewsets.ModelViewSet):
 class ResultadoViewSet(viewsets.ModelViewSet):
     queryset = Resultado.objects.all()
     serializer_class   = ResultadoSerializer
+    permission_classes = [permissions.AllowAny]
+
+class ReferendumViewSet(viewsets.ModelViewSet):
+    queryset = Referendum.objects.all()
+    serializer_class   = ReferendumSerializer
+    permission_classes = [permissions.AllowAny]
+
+class VotoReferendumViewSet(viewsets.ModelViewSet):
+    queryset = VotoReferendum.objects.all()
+    serializer_class   = VotoReferendumSerializer
+    permission_classes = [permissions.AllowAny]
+
+class ResultadoReferendumViewSet(viewsets.ModelViewSet):
+    queryset = ResultadoReferendum.objects.all()
+    serializer_class   = ResultadoReferendumSerializer
     permission_classes = [permissions.AllowAny]
